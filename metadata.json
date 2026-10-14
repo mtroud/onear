@@ -1,0 +1,6 @@
+{
+  "name": "نظام تكريم المنتسبين المميزين",
+  "description": "نظام متكامل لاختيار وتكريم المنتسبين المميزين شهرياً وتوليد لوحات ولوحات شرف تقديرية عالية الجودة متوافقة مع الطباعة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
