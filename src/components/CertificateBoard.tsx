@@ -6,6 +6,7 @@ import { ArabesqueCorners } from './artwork/ArabesqueCorners';
 import { CalligraphyHeader } from './artwork/CalligraphyHeader';
 import { CertificateFrame } from './artwork/CertificateFrame';
 import { QRCodeSVG } from 'qrcode.react';
+import { motion } from 'motion/react';
 
 interface CertificateBoardProps {
   settings: BoardSettings;
@@ -23,6 +24,7 @@ interface CertificateBoardProps {
   customPhoto2?: string;
   photoOffset2?: { x: number; y: number; zoom: number };
   isPrintMode?: boolean;
+  animationKey?: number | string;
 }
 
 export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps>(
@@ -43,9 +45,12 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
       customPhoto2,
       photoOffset2 = { x: 0, y: 0, zoom: 1 },
       isPrintMode = false,
+      animationKey = 0,
     },
     ref
   ) => {
+    const shouldAnimate = settings.enableAnimations !== false && !isPrintMode;
+
     // Determine details for Person 1 (Displayed on the right in RTL or left depending on custom)
     const name1 = customName1 || person1?.name || 'الاسم الكامل للمنتسب الأول';
     const title1 = customTitle1 || person1?.title || 'المسمى الوظيفي';
@@ -153,10 +158,21 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
           {/* Header Section */}
           <div className="flex flex-col items-center justify-center text-center mt-1 sm:mt-2">
             {/* Top Calligraphy Badge */}
-            <CalligraphyHeader title={settings.organizationName} />
+            <motion.div
+              key={`calligraphy-${animationKey}`}
+              initial={shouldAnimate ? { opacity: 0, y: -25 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, ease: 'easeOut' }}
+            >
+              <CalligraphyHeader title={settings.organizationName} />
+            </motion.div>
 
             {/* Main Honor Title */}
-            <h1
+            <motion.h1
+              key={`title-${animationKey}`}
+              initial={shouldAnimate ? { opacity: 0, scale: 0.9, y: -15 } : false}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
               className="mt-3 sm:mt-4 text-2xl sm:text-4xl md:text-5xl font-bold text-slate-950 tracking-tight leading-tight"
               style={{
                 fontFamily: "'Amiri', serif",
@@ -170,23 +186,39 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
               <span> لعام </span>
               <span className="text-slate-900">{formattedYear}</span>
               <span> م</span>
-            </h1>
+            </motion.h1>
 
             {/* Subtitle / Honorary Motto */}
             {settings.subTitle && (
-              <p
+              <motion.p
+                key={`subtitle-${animationKey}`}
+                initial={shouldAnimate ? { opacity: 0, y: -8 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.28 }}
                 className="mt-2 text-lg sm:text-2xl font-bold text-slate-800 tracking-wide"
                 style={{ fontFamily: "'Reem Kufi', 'Amiri', sans-serif" }}
               >
                 {settings.subTitle}
-              </p>
+              </motion.p>
             )}
           </div>
 
           {/* Center Portraits Section (Two Distinguished Affiliates) */}
           <div className="flex items-center justify-center gap-8 sm:gap-16 md:gap-24 my-auto py-2">
             {/* Person 1 (Right in RTL) */}
-            <div className="flex flex-col items-center group">
+            <motion.div
+              key={`person1-${animationKey}`}
+              initial={shouldAnimate ? { opacity: 0, scale: 0.72, y: 35 } : false}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{
+                duration: 0.65,
+                delay: 0.38,
+                type: 'spring',
+                stiffness: 130,
+                damping: 14,
+              }}
+              className="flex flex-col items-center group"
+            >
               {/* Circular Portrait Frame */}
               <div
                 className="relative rounded-full overflow-hidden shadow-2xl transition-transform duration-300"
@@ -215,7 +247,11 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
               </div>
 
               {/* Name Pill Badge (Navy Blue Capsule) */}
-              <div
+              <motion.div
+                key={`badge1-${animationKey}`}
+                initial={shouldAnimate ? { opacity: 0, y: 18, scale: 0.95 } : false}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.45, delay: 0.55 }}
                 className="mt-4 sm:mt-5 px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-transform duration-200"
                 style={{
                   backgroundColor: settings.badgeColor,
@@ -231,7 +267,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                 >
                   {name1}
                 </span>
-              </div>
+              </motion.div>
 
               {/* Optional Title / Department beneath */}
               {(settings.showTitles || settings.showDepartments) && (
@@ -248,10 +284,22 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                   )}
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Person 2 (Left in RTL) */}
-            <div className="flex flex-col items-center group">
+            <motion.div
+              key={`person2-${animationKey}`}
+              initial={shouldAnimate ? { opacity: 0, scale: 0.72, y: 35 } : false}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{
+                duration: 0.65,
+                delay: 0.48,
+                type: 'spring',
+                stiffness: 130,
+                damping: 14,
+              }}
+              className="flex flex-col items-center group"
+            >
               {/* Circular Portrait Frame */}
               <div
                 className="relative rounded-full overflow-hidden shadow-2xl transition-transform duration-300"
@@ -280,7 +328,11 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
               </div>
 
               {/* Name Pill Badge (Navy Blue Capsule) */}
-              <div
+              <motion.div
+                key={`badge2-${animationKey}`}
+                initial={shouldAnimate ? { opacity: 0, y: 18, scale: 0.95 } : false}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.45, delay: 0.65 }}
                 className="mt-4 sm:mt-5 px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-transform duration-200"
                 style={{
                   backgroundColor: settings.badgeColor,
@@ -296,7 +348,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                 >
                   {name2}
                 </span>
-              </div>
+              </motion.div>
 
               {/* Optional Title / Department beneath */}
               {(settings.showTitles || settings.showDepartments) && (
@@ -313,7 +365,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                   )}
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
 
           {/* Footer Section: Optional Official Stamp or Signatures */}
@@ -336,8 +388,14 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
 
             {/* Official Seal / Stamp in Center */}
             {settings.showOfficialSeal ? (
-              <div className="flex flex-col items-center justify-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-amber-700/60 p-1 flex items-center justify-center text-center rotate-[-12deg] bg-amber-500/10 shadow-sm">
+              <motion.div
+                key={`seal-${animationKey}`}
+                initial={shouldAnimate ? { opacity: 0, scale: 1.45, rotate: -35 } : false}
+                animate={{ opacity: 1, scale: 1, rotate: -12 }}
+                transition={{ duration: 0.55, delay: 0.75, type: 'spring', stiffness: 180, damping: 14 }}
+                className="flex flex-col items-center justify-center"
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-amber-700/60 p-1 flex items-center justify-center text-center bg-amber-500/10 shadow-sm">
                   <div className="w-full h-full rounded-full border border-dashed border-amber-700 flex flex-col items-center justify-center">
                     <span className="text-[9px] text-amber-900 font-bold leading-tight">
                       {settings.organizationName}
@@ -350,7 +408,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ) : (
               <div className="flex items-center gap-2 text-amber-900/70 text-xs sm:text-sm font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
@@ -377,13 +435,23 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
 
             {/* Optional Digital Verification QR Code */}
             {settings.showQRCode && (
-              <div className="absolute bottom-1 right-2 sm:bottom-2 sm:right-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-xs px-2 py-1 rounded-xl border border-amber-600/40 shadow-xs pointer-events-auto">
+              <motion.div
+                key={`qr-${animationKey}`}
+                initial={shouldAnimate ? { opacity: 0, scale: 0.75 } : false}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.82, duration: 0.4 }}
+                className="absolute bottom-1 right-2 sm:bottom-2 sm:right-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-xs px-2 py-1 rounded-xl border border-amber-600/40 shadow-xs pointer-events-auto"
+              >
                 <div className="bg-white p-0.5 rounded-md">
                   <QRCodeSVG
                     value={
-                      typeof window !== 'undefined'
-                        ? `${window.location.origin}${window.location.pathname}?view=public`
-                        : 'https://example.com'
+                      settings.customWebsiteUrl?.trim()
+                        ? (settings.customWebsiteUrl.includes('?view=public')
+                            ? settings.customWebsiteUrl.trim()
+                            : `${settings.customWebsiteUrl.trim().replace(/\/$/, '')}?view=public`)
+                        : (typeof window !== 'undefined'
+                            ? `${window.location.origin}${window.location.pathname}?view=public`
+                            : 'https://example.com')
                     }
                     size={42}
                     level="M"
@@ -394,7 +462,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                   <div>لوحة الشرف</div>
                   <div className="text-amber-800">امسح للزيارة</div>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>

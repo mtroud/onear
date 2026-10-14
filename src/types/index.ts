@@ -70,5 +70,7 @@ export interface BoardSettings {
   photoBorderColor: string;
   photoBorderWidth: number;
   showQRCode: boolean;
+  enableAnimations: boolean;
+  customWebsiteUrl?: string;
   boardAspectRatio: 'a4_landscape' | 'a3_landscape' | 'social_16_9';
 }

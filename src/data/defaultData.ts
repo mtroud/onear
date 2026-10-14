@@ -121,6 +121,8 @@ export const DEFAULT_BOARD_SETTINGS: BoardSettings = {
   photoBorderColor: '#c7a760',
   photoBorderWidth: 4,
   showQRCode: false,
+  enableAnimations: true,
+  customWebsiteUrl: '',
   boardAspectRatio: 'a4_landscape',
 };
 

@@ -129,6 +129,9 @@ export default function App() {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
   const [activeArchiveId, setActiveArchiveId] = useState<string>('award-2026-08');
 
+  // Animation trigger key
+  const [animKey, setAnimKey] = useState<number>(0);
+
   // Board ref
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -298,6 +301,10 @@ export default function App() {
           monthName={currentMonthName}
           year={selectedYear}
           onSwitchToPublicView={() => {}}
+          customWebsiteUrl={boardSettings.customWebsiteUrl}
+          setCustomWebsiteUrl={(url) =>
+            setBoardSettings((prev) => ({ ...prev, customWebsiteUrl: url }))
+          }
         />
       </>
     );
@@ -489,6 +496,18 @@ export default function App() {
 
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => {
+                    setAnimKey((prev) => prev + 1);
+                    confetti({ particleCount: 20, spread: 45, origin: { y: 0.6 } });
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition-all border border-amber-200 cursor-pointer"
+                  title="إعادة تشغيل التأثير الحركي لعناصر اللوحة"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+                  <span>إعادة الحركة</span>
+                </button>
+
+                <button
                   onClick={() => setIsQRCodeModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition-all border border-slate-300"
                 >
@@ -519,6 +538,7 @@ export default function App() {
                   person2={person2}
                   photoOffset1={photoOffset1}
                   photoOffset2={photoOffset2}
+                  animationKey={animKey}
                 />
               </div>
             </div>
@@ -645,6 +665,10 @@ export default function App() {
         monthName={currentMonthName}
         year={selectedYear}
         onSwitchToPublicView={() => setIsAdmin(false)}
+        customWebsiteUrl={boardSettings.customWebsiteUrl}
+        setCustomWebsiteUrl={(url) =>
+          setBoardSettings((prev) => ({ ...prev, customWebsiteUrl: url }))
+        }
       />
 
       {/* Change PIN Modal */}

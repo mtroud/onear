@@ -617,6 +617,26 @@ export const BoardCustomizer: React.FC<BoardCustomizerProps> = ({
                 </span>
               </div>
             </label>
+
+            {/* Enable Animations Toggle */}
+            <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.enableAnimations !== false}
+                onChange={(e) =>
+                  setSettings((prev) => ({ ...prev, enableAnimations: e.target.checked }))
+                }
+                className="mt-1 w-4 h-4 rounded text-amber-600 focus:ring-amber-500"
+              />
+              <div>
+                <span className="text-sm font-bold text-slate-800 block">
+                  تفعيل التأثيرات الحركية (Motion Animations)
+                </span>
+                <span className="text-xs text-slate-500">
+                  تأثيرات سقوط وظهور تدريجي تفاعلية للصور والعناوين لزيادة جاذبية اللوحة
+                </span>
+              </div>
+            </label>
           </div>
 
           {/* Signers Title Inputs if signatures enabled */}

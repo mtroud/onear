@@ -50,6 +50,7 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
   const [selectedAward, setSelectedAward] = useState<MonthlyHonorees | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [animKey, setAnimKey] = useState<number>(0);
 
   // Active display data (either current month or selected historical month)
   const displayYear = selectedAward ? selectedAward.year : year;
@@ -171,6 +172,19 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
               </button>
             </div>
           )}
+          {/* Action to replay animation */}
+          <div className="flex justify-center gap-2 pt-1">
+            <button
+              onClick={() => {
+                setAnimKey((prev) => prev + 1);
+                confetti({ particleCount: 25, spread: 50, origin: { y: 0.6 } });
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>إعادة عرض حركة التكريم</span>
+            </button>
+          </div>
         </div>
 
         {/* The Honor Board Component */}
@@ -185,6 +199,7 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
               person2={displayPerson2}
               photoOffset1={selectedAward?.photoOffset1 || photoOffset1}
               photoOffset2={selectedAward?.photoOffset2 || photoOffset2}
+              animationKey={animKey}
             />
           </div>
         </div>
