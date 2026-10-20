@@ -102,6 +102,10 @@ export const INITIAL_EMPLOYEES: Employee[] = [
 export const DEFAULT_BOARD_SETTINGS: BoardSettings = {
   theme: 'hussain_dome_corner',
   frameStyle: 'ornate_gold',
+  presetStyle: 'islamic_ornate',
+  showStarAura: false,
+  starAuraDensity: 'luxury',
+  fontFamily: 'Amiri',
   organizationName: 'مجمع سيد الشهداء',
   headerCalligraphy: 'مَجْمَع سَيّد الشُّهَداء',
   mainTitlePrefix: 'المنتسبين المميزين لشهر',

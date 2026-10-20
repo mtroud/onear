@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BoardSettings, BoardTheme, FrameStyle } from '../types';
+import { BoardSettings, BoardTheme, FrameStyle, BoardPreset } from '../types';
 import {
   Palette,
   Type,
@@ -13,6 +13,9 @@ import {
   Upload,
   Square,
   Maximize,
+  Star,
+  Wand2,
+  Sun,
 } from 'lucide-react';
 
 interface BoardCustomizerProps {
@@ -53,6 +56,55 @@ export const BoardCustomizer: React.FC<BoardCustomizerProps> = ({
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const applyPreset = (preset: BoardPreset) => {
+    if (preset === 'star_radiant') {
+      setSettings((prev) => ({
+        ...prev,
+        presetStyle: 'star_radiant',
+        showStarAura: true,
+        starAuraDensity: 'luxury',
+        theme: 'hussain_dome_corner',
+        frameStyle: 'ornate_gold',
+        photoBorderColor: '#eab308',
+        photoBorderWidth: 4,
+        badgeColor: '#152e59',
+      }));
+    } else if (preset === 'islamic_ornate') {
+      setSettings((prev) => ({
+        ...prev,
+        presetStyle: 'islamic_ornate',
+        showStarAura: false,
+        theme: 'hussain_dome_corner',
+        frameStyle: 'islamic_geometric',
+        photoBorderColor: '#c7a760',
+        photoBorderWidth: 4,
+        badgeColor: '#152e59',
+      }));
+    } else if (preset === 'formal_official') {
+      setSettings((prev) => ({
+        ...prev,
+        presetStyle: 'formal_official',
+        showStarAura: false,
+        theme: 'karbala_gold_frame',
+        frameStyle: 'double_royal',
+        photoBorderColor: '#854d0e',
+        photoBorderWidth: 4,
+        badgeColor: '#1e293b',
+      }));
+    } else if (preset === 'modern_minimal') {
+      setSettings((prev) => ({
+        ...prev,
+        presetStyle: 'modern_minimal',
+        showStarAura: false,
+        theme: 'shrine_classic',
+        frameStyle: 'simple_modern',
+        photoBorderColor: '#d97706',
+        photoBorderWidth: 3,
+        badgeColor: '#0369a1',
+      }));
     }
   };
 
@@ -102,6 +154,133 @@ export const BoardCustomizer: React.FC<BoardCustomizerProps> = ({
       {/* Tab 1: Design & Colors */}
       {activeTab === 'design' && (
         <div className="space-y-6 animate-in fade-in duration-150">
+          {/* Quick Design Template / Presets */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+              <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Wand2 className="w-4 h-4 text-amber-600" />
+                <span>أنماط وقوالب التصميم الجاهزة (تطبيق بنقرة واحدة)</span>
+              </label>
+              <span className="text-[11px] text-amber-800 font-semibold">
+                اختر نمطاً متناسقاً يضبط الألوان والإطارات والزخارف بضغطة واحدة
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {/* 1. Star Style (نمط النجوم) */}
+              <button
+                type="button"
+                onClick={() => applyPreset('star_radiant')}
+                className={`p-3 rounded-xl border-2 text-right transition-all relative flex flex-col justify-between cursor-pointer ${
+                  settings.showStarAura || settings.presetStyle === 'star_radiant'
+                    ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-yellow-100/70 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'border-slate-200 hover:border-amber-300 bg-white'
+                }`}
+              >
+                <div className="absolute top-2 left-2 flex items-center gap-0.5 bg-amber-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-xs">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  <span>جديد</span>
+                </div>
+                <div>
+                  <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center mb-2 shadow-xs">
+                    <Star className="w-4 h-4 fill-current" />
+                  </div>
+                  <div className="text-xs font-bold text-slate-900">نمط النجوم الذهبية</div>
+                  <p className="text-[10px] text-slate-600 mt-0.5 leading-snug">
+                    عناصر زخرفية وهالات متلألئة خلف صور المنتسبين
+                  </p>
+                </div>
+                <div className="mt-2 pt-1 border-t border-amber-200/60 flex items-center justify-between text-[10px] text-amber-900 font-semibold">
+                  <span>هالات ونجوم برّاقة</span>
+                  {(settings.showStarAura || settings.presetStyle === 'star_radiant') && (
+                    <Check className="w-3.5 h-3.5 text-amber-700 font-bold" />
+                  )}
+                </div>
+              </button>
+
+              {/* 2. Islamic Ornate */}
+              <button
+                type="button"
+                onClick={() => applyPreset('islamic_ornate')}
+                className={`p-3 rounded-xl border-2 text-right transition-all relative flex flex-col justify-between cursor-pointer ${
+                  !settings.showStarAura && settings.presetStyle === 'islamic_ornate'
+                    ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div>
+                  <div className="w-8 h-8 rounded-lg bg-amber-700 text-white flex items-center justify-center mb-2 shadow-xs text-sm">
+                    🕌
+                  </div>
+                  <div className="text-xs font-bold text-slate-900">نمط إسلامي زخرفي</div>
+                  <p className="text-[10px] text-slate-600 mt-0.5 leading-snug">
+                    قبة الحسين (ع) وزخارف الأركان مع إطار هندسي
+                  </p>
+                </div>
+                <div className="mt-2 pt-1 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-600 font-semibold">
+                  <span>أرابيسك كربلائي</span>
+                  {!settings.showStarAura && settings.presetStyle === 'islamic_ornate' && (
+                    <Check className="w-3.5 h-3.5 text-amber-700 font-bold" />
+                  )}
+                </div>
+              </button>
+
+              {/* 3. Formal Official */}
+              <button
+                type="button"
+                onClick={() => applyPreset('formal_official')}
+                className={`p-3 rounded-xl border-2 text-right transition-all relative flex flex-col justify-between cursor-pointer ${
+                  !settings.showStarAura && settings.presetStyle === 'formal_official'
+                    ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div>
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 text-amber-400 flex items-center justify-center mb-2 shadow-xs text-sm">
+                    🏛️
+                  </div>
+                  <div className="text-xs font-bold text-slate-900">نمط رسمي وقور</div>
+                  <p className="text-[10px] text-slate-600 mt-0.5 leading-snug">
+                    إطار ملكي مزدوج مع خط رصين وأختام رسمية
+                  </p>
+                </div>
+                <div className="mt-2 pt-1 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-600 font-semibold">
+                  <span>طابع رسمي معتمد</span>
+                  {!settings.showStarAura && settings.presetStyle === 'formal_official' && (
+                    <Check className="w-3.5 h-3.5 text-amber-700 font-bold" />
+                  )}
+                </div>
+              </button>
+
+              {/* 4. Modern Minimal */}
+              <button
+                type="button"
+                onClick={() => applyPreset('modern_minimal')}
+                className={`p-3 rounded-xl border-2 text-right transition-all relative flex flex-col justify-between cursor-pointer ${
+                  !settings.showStarAura && settings.presetStyle === 'modern_minimal'
+                    ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-500/30 shadow-xs'
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <div>
+                  <div className="w-8 h-8 rounded-lg bg-sky-700 text-white flex items-center justify-center mb-2 shadow-xs text-sm">
+                    ✨
+                  </div>
+                  <div className="text-xs font-bold text-slate-900">نمط عصري بسيط</div>
+                  <p className="text-[10px] text-slate-600 mt-0.5 leading-snug">
+                    خطوط نقية وهادئة بإطار عصري خفيف
+                  </p>
+                </div>
+                <div className="mt-2 pt-1 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-600 font-semibold">
+                  <span>بسيط وأنيق</span>
+                  {!settings.showStarAura && settings.presetStyle === 'modern_minimal' && (
+                    <Check className="w-3.5 h-3.5 text-amber-700 font-bold" />
+                  )}
+                </div>
+              </button>
+            </div>
+          </div>
+
           {/* Theme Presets */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-2">
@@ -335,6 +514,176 @@ export const BoardCustomizer: React.FC<BoardCustomizerProps> = ({
                 <p className="text-[10px] text-slate-500 mt-0.5">الاعتماد على الخلفية فقط</p>
               </div>
             </div>
+          </div>
+
+          {/* Dedicated Star Style (نمط النجوم) & Sparkling Elements Section */}
+          <div
+            className={`p-4 sm:p-5 rounded-2xl border-2 transition-all ${
+              settings.showStarAura || settings.presetStyle === 'star_radiant'
+                ? 'bg-gradient-to-br from-amber-50/90 via-yellow-50/80 to-amber-100/60 border-amber-400 ring-2 ring-amber-400/30 shadow-sm'
+                : 'bg-slate-50/80 border-slate-200'
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200/60">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-400 text-white flex items-center justify-center shadow-md shrink-0">
+                  <Star className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      نمط النجوم (عناصر زخرفية ذهبية متلألئة خلف صور المنتسبين)
+                    </h3>
+                    <span className="text-[10px] font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      جديد
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    يضيف هالات إشعاعية ذهبية، نجوماً رباعية وثمانية متلألئة، وبريقاً جذاباً يحيط بصور المكرمين كنجوم للمجمع
+                  </p>
+                </div>
+              </div>
+
+              {/* Toggle Switch */}
+              <button
+                type="button"
+                onClick={() =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    showStarAura: !prev.showStarAura,
+                    presetStyle: !prev.showStarAura ? 'star_radiant' : prev.presetStyle,
+                  }))
+                }
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-center cursor-pointer ${
+                  settings.showStarAura || settings.presetStyle === 'star_radiant'
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white ring-2 ring-amber-400'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>
+                  {settings.showStarAura || settings.presetStyle === 'star_radiant'
+                    ? 'نمط النجوم مفعّل ✓'
+                    : 'تفعيل نمط النجوم'}
+                </span>
+              </button>
+            </div>
+
+            {/* Star Density & Customization when Star Style is active */}
+            {(settings.showStarAura || settings.presetStyle === 'star_radiant') && (
+              <div className="mt-3.5 space-y-3 pt-1">
+                <label className="block text-xs font-bold text-slate-800">
+                  كثافة وبريق العناصر الزخرفية الذهبية:
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {/* Luxury */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettings((prev) => ({ ...prev, starAuraDensity: 'luxury' }))
+                    }
+                    className={`p-2.5 rounded-xl border text-right transition-all flex items-center justify-between cursor-pointer ${
+                      (settings.starAuraDensity || 'luxury') === 'luxury'
+                        ? 'bg-white border-amber-600 ring-2 ring-amber-400/40 shadow-xs'
+                        : 'bg-amber-100/50 hover:bg-white border-amber-200 text-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>🌟 فاخر ومكثف (الموصى به)</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        أشعة شمسية + نجوم إسلامية + نجوم متلألئة برّاقة
+                      </p>
+                    </div>
+                    {(settings.starAuraDensity || 'luxury') === 'luxury' && (
+                      <Check className="w-4 h-4 text-amber-600" />
+                    )}
+                  </button>
+
+                  {/* Vibrant */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettings((prev) => ({ ...prev, starAuraDensity: 'vibrant' }))
+                    }
+                    className={`p-2.5 rounded-xl border text-right transition-all flex items-center justify-between cursor-pointer ${
+                      settings.starAuraDensity === 'vibrant'
+                        ? 'bg-white border-amber-600 ring-2 ring-amber-400/40 shadow-xs'
+                        : 'bg-amber-100/50 hover:bg-white border-amber-200 text-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>✨ حيوي متألق</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        نجوم برّاقة محيطة وذرات ذهبية متلألئة
+                      </p>
+                    </div>
+                    {settings.starAuraDensity === 'vibrant' && (
+                      <Check className="w-4 h-4 text-amber-600" />
+                    )}
+                  </button>
+
+                  {/* Gentle */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettings((prev) => ({ ...prev, starAuraDensity: 'gentle' }))
+                    }
+                    className={`p-2.5 rounded-xl border text-right transition-all flex items-center justify-between cursor-pointer ${
+                      settings.starAuraDensity === 'gentle'
+                        ? 'bg-white border-amber-600 ring-2 ring-amber-400/40 shadow-xs'
+                        : 'bg-amber-100/50 hover:bg-white border-amber-200 text-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>🌙 هادئ ناعم</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        هالة ذهبية وأشعة رقيقة خفيفة
+                      </p>
+                    </div>
+                    {settings.starAuraDensity === 'gentle' && (
+                      <Check className="w-4 h-4 text-amber-600" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Quick Photo Border Color when Stars are on */}
+                <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
+                  <span className="font-bold text-slate-700">لون إطار الصورة المتناسق مع النجوم:</span>
+                  {[
+                    { label: 'ذهبي متألق (موصى به)', color: '#eab308' },
+                    { label: 'ذهبي أصيل', color: '#c7a760' },
+                    { label: 'أبيض لؤلؤي', color: '#ffffff' },
+                    { label: 'كحلي مذهب', color: '#152e59' },
+                  ].map((item) => (
+                    <button
+                      key={item.color}
+                      type="button"
+                      onClick={() =>
+                        setSettings((prev) => ({ ...prev, photoBorderColor: item.color }))
+                      }
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border flex items-center gap-1.5 transition-all cursor-pointer ${
+                        settings.photoBorderColor === item.color
+                          ? 'border-amber-600 bg-white ring-1 ring-amber-500 shadow-xs'
+                          : 'border-amber-200/80 bg-white/60 hover:bg-white'
+                      }`}
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full border border-black/20"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Badge Color Presets */}

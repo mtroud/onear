@@ -5,6 +5,7 @@ import { ShrineDomeWatermark } from './artwork/ShrineDomeWatermark';
 import { ArabesqueCorners } from './artwork/ArabesqueCorners';
 import { CalligraphyHeader } from './artwork/CalligraphyHeader';
 import { CertificateFrame } from './artwork/CertificateFrame';
+import { GoldenStarAura } from './artwork/GoldenStarAura';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion } from 'motion/react';
 
@@ -219,30 +220,43 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
               }}
               className="flex flex-col items-center group"
             >
-              {/* Circular Portrait Frame */}
-              <div
-                className="relative rounded-full overflow-hidden shadow-2xl transition-transform duration-300"
-                style={{
-                  width: 'clamp(140px, 22vw, 240px)',
-                  height: 'clamp(140px, 22vw, 240px)',
-                  border: `${settings.photoBorderWidth}px solid ${settings.photoBorderColor}`,
-                  boxShadow:
-                    '0 15px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.1)',
-                }}
-              >
-                <div className="w-full h-full bg-slate-200 overflow-hidden flex items-center justify-center relative">
-                  <img
-                    src={photo1}
-                    alt={name1}
-                    className="w-full h-full object-cover select-none pointer-events-none"
-                    style={{
-                      transform: `translate(${photoOffset1.x}px, ${photoOffset1.y}px) scale(${photoOffset1.zoom})`,
-                      transformOrigin: 'center center',
-                    }}
-                    crossOrigin="anonymous"
+              {/* Photo Area with Golden Star Aura (نمط النجوم) */}
+              <div className="relative flex items-center justify-center">
+                {/* Golden Sparkling Star Aura behind the photo */}
+                {(settings.showStarAura || settings.presetStyle === 'star_radiant') && (
+                  <GoldenStarAura
+                    density={settings.starAuraDensity || 'luxury'}
+                    enableAnimation={shouldAnimate}
                   />
-                  {/* Subtle inner circular shadow ring */}
-                  <div className="absolute inset-0 rounded-full shadow-inner pointer-events-none border border-black/10" />
+                )}
+
+                {/* Circular Portrait Frame */}
+                <div
+                  className="relative rounded-full overflow-hidden shadow-2xl transition-transform duration-300 z-10"
+                  style={{
+                    width: 'clamp(140px, 22vw, 240px)',
+                    height: 'clamp(140px, 22vw, 240px)',
+                    border: `${settings.photoBorderWidth}px solid ${settings.photoBorderColor}`,
+                    boxShadow:
+                      settings.showStarAura || settings.presetStyle === 'star_radiant'
+                        ? '0 0 25px rgba(245, 158, 11, 0.45), 0 15px 35px -5px rgba(0, 0, 0, 0.35)'
+                        : '0 15px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  <div className="w-full h-full bg-slate-200 overflow-hidden flex items-center justify-center relative">
+                    <img
+                      src={photo1}
+                      alt={name1}
+                      className="w-full h-full object-cover select-none pointer-events-none"
+                      style={{
+                        transform: `translate(${photoOffset1.x}px, ${photoOffset1.y}px) scale(${photoOffset1.zoom})`,
+                        transformOrigin: 'center center',
+                      }}
+                      crossOrigin="anonymous"
+                    />
+                    {/* Subtle inner circular shadow ring */}
+                    <div className="absolute inset-0 rounded-full shadow-inner pointer-events-none border border-black/10" />
+                  </div>
                 </div>
               </div>
 
@@ -252,7 +266,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                 initial={shouldAnimate ? { opacity: 0, y: 18, scale: 0.95 } : false}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.45, delay: 0.55 }}
-                className="mt-4 sm:mt-5 px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-transform duration-200"
+                className="mt-4 sm:mt-5 px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-transform duration-200 z-10"
                 style={{
                   backgroundColor: settings.badgeColor,
                   color: settings.badgeTextColor,
@@ -271,7 +285,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
 
               {/* Optional Title / Department beneath */}
               {(settings.showTitles || settings.showDepartments) && (
-                <div className="mt-1.5 text-center">
+                <div className="mt-1.5 text-center z-10">
                   {settings.showTitles && title1 && (
                     <span className="block text-xs sm:text-sm font-semibold text-slate-700">
                       {title1}
@@ -300,30 +314,43 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
               }}
               className="flex flex-col items-center group"
             >
-              {/* Circular Portrait Frame */}
-              <div
-                className="relative rounded-full overflow-hidden shadow-2xl transition-transform duration-300"
-                style={{
-                  width: 'clamp(140px, 22vw, 240px)',
-                  height: 'clamp(140px, 22vw, 240px)',
-                  border: `${settings.photoBorderWidth}px solid ${settings.photoBorderColor}`,
-                  boxShadow:
-                    '0 15px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.1)',
-                }}
-              >
-                <div className="w-full h-full bg-slate-200 overflow-hidden flex items-center justify-center relative">
-                  <img
-                    src={photo2}
-                    alt={name2}
-                    className="w-full h-full object-cover select-none pointer-events-none"
-                    style={{
-                      transform: `translate(${photoOffset2.x}px, ${photoOffset2.y}px) scale(${photoOffset2.zoom})`,
-                      transformOrigin: 'center center',
-                    }}
-                    crossOrigin="anonymous"
+              {/* Photo Area with Golden Star Aura (نمط النجوم) */}
+              <div className="relative flex items-center justify-center">
+                {/* Golden Sparkling Star Aura behind the photo */}
+                {(settings.showStarAura || settings.presetStyle === 'star_radiant') && (
+                  <GoldenStarAura
+                    density={settings.starAuraDensity || 'luxury'}
+                    enableAnimation={shouldAnimate}
                   />
-                  {/* Subtle inner circular shadow ring */}
-                  <div className="absolute inset-0 rounded-full shadow-inner pointer-events-none border border-black/10" />
+                )}
+
+                {/* Circular Portrait Frame */}
+                <div
+                  className="relative rounded-full overflow-hidden shadow-2xl transition-transform duration-300 z-10"
+                  style={{
+                    width: 'clamp(140px, 22vw, 240px)',
+                    height: 'clamp(140px, 22vw, 240px)',
+                    border: `${settings.photoBorderWidth}px solid ${settings.photoBorderColor}`,
+                    boxShadow:
+                      settings.showStarAura || settings.presetStyle === 'star_radiant'
+                        ? '0 0 25px rgba(245, 158, 11, 0.45), 0 15px 35px -5px rgba(0, 0, 0, 0.35)'
+                        : '0 15px 35px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0,0,0,0.1)',
+                  }}
+                >
+                  <div className="w-full h-full bg-slate-200 overflow-hidden flex items-center justify-center relative">
+                    <img
+                      src={photo2}
+                      alt={name2}
+                      className="w-full h-full object-cover select-none pointer-events-none"
+                      style={{
+                        transform: `translate(${photoOffset2.x}px, ${photoOffset2.y}px) scale(${photoOffset2.zoom})`,
+                        transformOrigin: 'center center',
+                      }}
+                      crossOrigin="anonymous"
+                    />
+                    {/* Subtle inner circular shadow ring */}
+                    <div className="absolute inset-0 rounded-full shadow-inner pointer-events-none border border-black/10" />
+                  </div>
                 </div>
               </div>
 
@@ -333,7 +360,7 @@ export const CertificateBoard = forwardRef<HTMLDivElement, CertificateBoardProps
                 initial={shouldAnimate ? { opacity: 0, y: 18, scale: 0.95 } : false}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.45, delay: 0.65 }}
-                className="mt-4 sm:mt-5 px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-transform duration-200"
+                className="mt-4 sm:mt-5 px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-transform duration-200 z-10"
                 style={{
                   backgroundColor: settings.badgeColor,
                   color: settings.badgeTextColor,

@@ -47,9 +47,19 @@ export type FrameStyle =
   | 'double_royal'
   | 'none';
 
+export type BoardPreset =
+  | 'islamic_ornate'
+  | 'formal_official'
+  | 'modern_minimal'
+  | 'star_radiant';
+
 export interface BoardSettings {
   theme: BoardTheme;
   frameStyle: FrameStyle;
+  presetStyle?: BoardPreset;
+  showStarAura: boolean;
+  starAuraDensity?: 'gentle' | 'vibrant' | 'luxury';
+  fontFamily: 'Amiri' | 'Cairo' | 'Tajawal' | 'Reem Kufi';
   organizationName: string;
   headerCalligraphy: string;
   mainTitlePrefix: string;
@@ -74,3 +84,15 @@ export interface BoardSettings {
   customWebsiteUrl?: string;
   boardAspectRatio: 'a4_landscape' | 'a3_landscape' | 'social_16_9';
 }
+
+export interface Nomination {
+  id: string;
+  year: number;
+  monthIndex: number;
+  employeeId: string;
+  nominatedBy: string;
+  reason: string;
+  votes: number;
+  createdAt: string;
+}
+

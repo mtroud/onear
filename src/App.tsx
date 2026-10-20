@@ -16,6 +16,10 @@ import { PrintModal } from './components/PrintModal';
 import { QRCodeModal } from './components/QRCodeModal';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { PublicVisitorView } from './components/PublicVisitorView';
+import { AnnualHallOfFame } from './components/AnnualHallOfFame';
+import { NominationManager } from './components/NominationManager';
+import { AffiliateBioModal } from './components/AffiliateBioModal';
+import { BackupRestoreModal } from './components/BackupRestoreModal';
 import {
   Printer,
   Award,
@@ -37,6 +41,10 @@ import {
   KeyRound,
   LogOut,
   ShieldCheck,
+  Star,
+  Trophy,
+  UserCheck,
+  Database,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -122,11 +130,23 @@ export default function App() {
     zoom: 1,
   });
 
-  // Active view tab: 'preview' | 'employees' | 'customizer' | 'history'
-  const [activeTab, setActiveTab] = useState<'preview' | 'employees' | 'customizer' | 'history'>('preview');
+  // Active view tab: 'preview' | 'employees' | 'customizer' | 'history' | 'hall_of_fame' | 'nominations'
+  const [activeTab, setActiveTab] = useState<
+    'preview' | 'employees' | 'customizer' | 'history' | 'hall_of_fame' | 'nominations'
+  >('preview');
 
-  // Print Modal
+  // Modals state
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
+  const [printModalInitialMode, setPrintModalInitialMode] = useState<
+    'board' | 'certificate' | 'story' | 'square'
+  >('board');
+  const [printModalEmployee, setPrintModalEmployee] = useState<Employee | null>(null);
+
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState<boolean>(false);
+  const [bioEmployee, setBioEmployee] = useState<Employee | null>(null);
+  const [bioMonth, setBioMonth] = useState<string>(MONTH_NAMES_SIMPLE[selectedMonthIndex]);
+  const [bioYear, setBioYear] = useState<number>(selectedYear);
+
   const [activeArchiveId, setActiveArchiveId] = useState<string>('award-2026-08');
 
   // Animation trigger key
@@ -383,6 +403,29 @@ export default function App() {
 
           {/* Quick Print & Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Backup & Export Database */}
+            <button
+              onClick={() => setIsBackupModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs sm:text-sm font-bold border border-slate-300 transition-all cursor-pointer"
+              title="النسخ الاحتياطي وتصدير البيانات"
+            >
+              <Database className="w-4 h-4 text-slate-700" />
+              <span className="hidden lg:inline">النسخ الاحتياطي</span>
+            </button>
+
+            {/* Individual Certificate Shortcut */}
+            <button
+              onClick={() => {
+                setPrintModalInitialMode('certificate');
+                setIsPrintModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-950 rounded-xl text-xs sm:text-sm font-bold border border-amber-300 transition-all cursor-pointer"
+              title="توليد وطباعة شهادات تقدير فردية"
+            >
+              <Award className="w-4 h-4 text-amber-700" />
+              <span className="hidden md:inline">شهادة تقدير فردية</span>
+            </button>
+
             {/* QR Code Button */}
             <button
               onClick={() => setIsQRCodeModalOpen(true)}
@@ -395,7 +438,10 @@ export default function App() {
 
             {/* Print Board */}
             <button
-              onClick={() => setIsPrintModalOpen(true)}
+              onClick={() => {
+                setPrintModalInitialMode('board');
+                setIsPrintModalOpen(true);
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
@@ -416,6 +462,30 @@ export default function App() {
           >
             <Eye className="w-4 h-4 text-amber-600" />
             <span>لوحة التكريم والتحكم</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('hall_of_fame')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'hall_of_fame'
+                ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Trophy className="w-4 h-4 text-amber-600" />
+            <span>قاعة الشرف السنوية</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('nominations')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'nominations'
+                ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <UserCheck className="w-4 h-4 text-amber-600" />
+            <span>الترشيحات والتصويت</span>
           </button>
 
           <button
@@ -494,7 +564,44 @@ export default function App() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Star Style Quick Toggle */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextVal = !boardSettings.showStarAura;
+                    setBoardSettings((prev) => ({
+                      ...prev,
+                      showStarAura: nextVal,
+                      presetStyle: nextVal ? 'star_radiant' : prev.presetStyle,
+                      photoBorderColor: nextVal ? '#eab308' : prev.photoBorderColor,
+                    }));
+                    if (nextVal) {
+                      confetti({ particleCount: 25, spread: 55, origin: { y: 0.5 } });
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                    boardSettings.showStarAura || boardSettings.presetStyle === 'star_radiant'
+                      ? 'bg-amber-100 text-amber-950 border-amber-300 ring-2 ring-amber-400/40 shadow-xs'
+                      : 'bg-white hover:bg-amber-50 text-slate-700 border-slate-300'
+                  }`}
+                  title="تفعيل نمط النجوم والعناصر الذهبية المتلألئة خلف صور المنتسبين"
+                >
+                  <Star
+                    className={`w-3.5 h-3.5 ${
+                      boardSettings.showStarAura || boardSettings.presetStyle === 'star_radiant'
+                        ? 'text-amber-600 fill-current'
+                        : 'text-amber-500'
+                    }`}
+                  />
+                  <span>
+                    نمط النجوم{' '}
+                    {boardSettings.showStarAura || boardSettings.presetStyle === 'star_radiant'
+                      ? '(مفعّل)'
+                      : ''}
+                  </span>
+                </button>
+
                 <button
                   onClick={() => {
                     setAnimKey((prev) => prev + 1);
@@ -626,6 +733,59 @@ export default function App() {
             />
           </div>
         )}
+
+        {/* Tab 5: Annual Hall of Fame */}
+        {activeTab === 'hall_of_fame' && (
+          <div className="no-print">
+            <AnnualHallOfFame
+              history={history}
+              employees={employees}
+              useArabicNumerals={useArabicNumerals}
+              onSelectMonth={(yr, mIdx) => {
+                setSelectedYear(yr);
+                setSelectedMonthIndex(mIdx);
+                const award = history.find((h) => h.year === yr && h.monthIndex === mIdx);
+                if (award) {
+                  setPerson1Id(award.person1Id);
+                  setPerson2Id(award.person2Id);
+                }
+                setActiveTab('preview');
+              }}
+              onOpenBio={(emp, mName, yr) => {
+                setBioEmployee(emp);
+                setBioMonth(mName);
+                setBioYear(yr);
+              }}
+              onPrintCertificate={(emp, mName, yr) => {
+                setPrintModalEmployee(emp);
+                setPrintModalInitialMode('certificate');
+                setIsPrintModalOpen(true);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Tab 6: Department Nominations */}
+        {activeTab === 'nominations' && (
+          <div className="no-print">
+            <NominationManager
+              employees={employees}
+              selectedYear={selectedYear}
+              selectedMonthIndex={selectedMonthIndex}
+              monthName={currentMonthName}
+              person1Id={person1Id}
+              person2Id={person2Id}
+              onAssignToPerson1={(empId) => {
+                setPerson1Id(empId);
+                setActiveTab('preview');
+              }}
+              onAssignToPerson2={(empId) => {
+                setPerson2Id(empId);
+                setActiveTab('preview');
+              }}
+            />
+          </div>
+        )}
       </main>
 
       {/* Footer (Hidden when printing) */}
@@ -634,7 +794,7 @@ export default function App() {
           <span>نظام تكريم المنتسبين المميزين • متوافق مع كافة الطابعات الملونة بدقة 300 DPI وورق A4/A3</span>
           <button
             onClick={() => setIsAdmin(false)}
-            className="text-amber-800 hover:underline font-semibold"
+            className="text-amber-800 hover:underline font-semibold cursor-pointer"
           >
             الانتقال لصفحة الزائر العامة (رؤية فقط)
           </button>
@@ -650,6 +810,37 @@ export default function App() {
         year={selectedYear}
         person1Name={person1?.name || 'المنتسب الأول'}
         person2Name={person2?.name || 'المنتسب الثاني'}
+        person1={person1}
+        person2={person2}
+        settings={boardSettings}
+        initialMode={printModalInitialMode}
+        selectedEmployeeForCert={printModalEmployee}
+      />
+
+      {/* Backup & Restore Modal */}
+      <BackupRestoreModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        employees={employees}
+        setEmployees={setEmployees}
+        history={history}
+        setHistory={setHistory}
+        boardSettings={boardSettings}
+        setBoardSettings={setBoardSettings}
+      />
+
+      {/* Affiliate Bio Modal */}
+      <AffiliateBioModal
+        isOpen={Boolean(bioEmployee)}
+        onClose={() => setBioEmployee(null)}
+        employee={bioEmployee}
+        monthName={bioMonth}
+        year={bioYear}
+        onPrintCertificate={(emp) => {
+          setPrintModalEmployee(emp);
+          setPrintModalInitialMode('certificate');
+          setIsPrintModalOpen(true);
+        }}
       />
 
       {/* QR Code Generator Modal */}

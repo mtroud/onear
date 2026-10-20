@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Employee, MonthlyHonorees, BoardSettings } from '../types';
 import { CertificateBoard } from './CertificateBoard';
 import { PrintModal } from './PrintModal';
+import { AnnualHallOfFame } from './AnnualHallOfFame';
+import { AffiliateBioModal } from './AffiliateBioModal';
 import {
   Award,
   Calendar,
@@ -14,6 +16,8 @@ import {
   Heart,
   QrCode,
   Check,
+  Trophy,
+  Users,
 } from 'lucide-react';
 import { toArabicNumerals } from '../data/defaultData';
 import confetti from 'canvas-confetti';
@@ -47,6 +51,10 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
   onOpenAdminLogin,
   onOpenQRCodeModal,
 }) => {
+  const [visitorTab, setVisitorTab] = useState<'board' | 'hall_of_fame'>('board');
+  const [bioEmployee, setBioEmployee] = useState<Employee | null>(null);
+  const [bioMonth, setBioMonth] = useState<string>(monthName);
+  const [bioYear, setBioYear] = useState<number>(year);
   const [selectedAward, setSelectedAward] = useState<MonthlyHonorees | null>(null);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -142,18 +150,66 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Visitor Navigation Tabs */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center gap-2 border-t border-amber-100 overflow-x-auto py-1.5">
+          <button
+            onClick={() => setVisitorTab('board')}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              visitorTab === 'board'
+                ? 'bg-amber-100/90 text-amber-950 border border-amber-300 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Award className="w-3.5 h-3.5 text-amber-700" />
+            <span>لوحة التكريم الشهرية</span>
+          </button>
+
+          <button
+            onClick={() => setVisitorTab('hall_of_fame')}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              visitorTab === 'hall_of_fame'
+                ? 'bg-amber-100/90 text-amber-950 border border-amber-300 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-700" />
+            <span>قاعة الشرف السنوية</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* Welcome & Honor Banner */}
-        <div className="no-print text-center max-w-2xl mx-auto space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>
-              تكريم شهر {displayMonthName} لعام {toArabicNumerals(displayYear)} م
-            </span>
-          </div>
+        {visitorTab === 'hall_of_fame' ? (
+          <AnnualHallOfFame
+            history={history}
+            employees={employees}
+            useArabicNumerals={useArabicNumerals}
+            onSelectMonth={(yr, mIdx) => {
+              const match = history.find((h) => h.year === yr && h.monthIndex === mIdx);
+              if (match) setSelectedAward(match);
+              setVisitorTab('board');
+            }}
+            onOpenBio={(emp, mName, yr) => {
+              setBioEmployee(emp);
+              setBioMonth(mName);
+              setBioYear(yr);
+            }}
+            onPrintCertificate={(emp) => {
+              setIsPrintModalOpen(true);
+            }}
+          />
+        ) : (
+          <>
+            {/* Welcome & Honor Banner */}
+            <div className="no-print text-center max-w-2xl mx-auto space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>
+                  تكريم شهر {displayMonthName} لعام {toArabicNumerals(displayYear)} م
+                </span>
+              </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             نبارك للمنتسبين المميزين عطاءهم المبارك
           </h2>
@@ -312,6 +368,8 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
             </div>
           </div>
         )}
+          </>
+        )}
       </main>
 
       {/* Visitor Footer */}
@@ -325,7 +383,7 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
             <span>•</span>
             <button
               onClick={onOpenAdminLogin}
-              className="text-slate-500 hover:text-amber-800 underline flex items-center gap-1"
+              className="text-slate-500 hover:text-amber-800 underline flex items-center gap-1 cursor-pointer"
             >
               <Lock className="w-3 h-3" />
               <span>تسجيل دخول الإدارة</span>
@@ -343,6 +401,21 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
         year={displayYear}
         person1Name={displayPerson1?.name || 'المنتسب الأول'}
         person2Name={displayPerson2?.name || 'المنتسب الثاني'}
+        person1={displayPerson1}
+        person2={displayPerson2}
+        settings={boardSettings}
+      />
+
+      {/* Affiliate Bio Modal for Visitor */}
+      <AffiliateBioModal
+        isOpen={Boolean(bioEmployee)}
+        onClose={() => setBioEmployee(null)}
+        employee={bioEmployee}
+        monthName={bioMonth}
+        year={bioYear}
+        onPrintCertificate={(emp) => {
+          setIsPrintModalOpen(true);
+        }}
       />
     </div>
   );

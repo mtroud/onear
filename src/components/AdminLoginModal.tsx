@@ -17,11 +17,13 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [showPassword, setShowPassword] = useState(false);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput === adminPin || pinInput === '1234') {
+    if (pinInput === adminPin) {
       setErrorMsg(null);
       setPinInput('');
       onSuccess();
@@ -46,7 +48,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold cursor-pointer"
           >
             ✕
           </button>
@@ -60,17 +62,25 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
             <div className="relative">
               <KeyRound className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 autoFocus
-                placeholder="أدخل الرمز هنا..."
+                placeholder="••••"
                 value={pinInput}
                 onChange={(e) => {
                   setPinInput(e.target.value);
                   setErrorMsg(null);
                 }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl pr-9 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl pr-9 pl-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-medium cursor-pointer"
+                title={showPassword ? 'إخفاء الرمز' : 'إظهار الرمز'}
+              >
+                {showPassword ? 'إخفاء' : 'إظهار'}
+              </button>
             </div>
           </div>
 
@@ -80,12 +90,6 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               <span>{errorMsg}</span>
             </div>
           )}
-
-          <div className="p-3 bg-amber-50/70 border border-amber-200/70 rounded-xl text-[11px] text-amber-900">
-            <span className="font-bold">ملاحظة:</span> الرمز الافتراضي للإدارة هو{' '}
-            <code className="bg-amber-200/80 px-1.5 py-0.5 rounded font-bold font-mono">1234</code>.
-            يمكنك تغييره لاحقاً من داخل الإعدادات.
-          </div>
 
           <div className="pt-2 flex items-center justify-end gap-2">
             <button
