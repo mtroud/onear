@@ -151,6 +151,21 @@ export const MonthlySelector: React.FC<MonthlySelectorProps> = ({
               <span>{isAlreadyInHistory ? 'تحديث في السجل' : 'حفظ في السجل'}</span>
             </button>
           </div>
+
+          {/* Quick Lottery Shortcut Button */}
+          {onOpenNominations && (
+            <div className="flex flex-col justify-end">
+              <label className="text-[11px] text-transparent mb-1">القرعة</label>
+              <button
+                type="button"
+                onClick={onOpenNominations}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 text-slate-950 font-black rounded-xl text-xs sm:text-sm shadow-xs transition-all cursor-pointer hover:scale-105 active:scale-95 border border-amber-500/40"
+                title="الانتقال لترشيحات مسؤولي الشعب والقرعة الإلكترونية"
+              >
+                <span>🎲 القرعة والترشيحات</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

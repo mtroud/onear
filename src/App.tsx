@@ -45,6 +45,7 @@ import {
   Trophy,
   UserCheck,
   Database,
+  Shuffle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -282,6 +283,8 @@ export default function App() {
           boardSettings={boardSettings}
           monthName={currentMonthName}
           year={selectedYear}
+          selectedYear={selectedYear}
+          selectedMonthIndex={selectedMonthIndex}
           useArabicNumerals={useArabicNumerals}
           person1={person1}
           person2={person2}
@@ -291,6 +294,12 @@ export default function App() {
           employees={employees}
           onOpenAdminLogin={() => setIsAdminLoginModalOpen(true)}
           onOpenQRCodeModal={() => setIsQRCodeModalOpen(true)}
+          onAssignToPerson1={(id) => {
+            setPerson1Id(id);
+          }}
+          onAssignToPerson2={(id) => {
+            setPerson2Id(id);
+          }}
         />
 
         {/* Admin Login Modal */}
@@ -456,7 +465,7 @@ export default function App() {
             onClick={() => setActiveTab('preview')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'preview'
-                ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                ? 'bg-amber-100/90 text-amber-950 border border-amber-300 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
@@ -464,28 +473,32 @@ export default function App() {
             <span>لوحة التكريم والتحكم</span>
           </button>
 
+          {/* Tab 2: Nominations & Lottery - Prominent Placement */}
+          <button
+            onClick={() => setActiveTab('nominations')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'nominations'
+                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-400 shadow-md'
+                : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-2 border-amber-300'
+            }`}
+          >
+            <UserCheck className="w-4 h-4 text-amber-800" />
+            <span>ترشيحات المسؤولين والقرعة 🎲</span>
+            <span className="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">
+              جديد
+            </span>
+          </button>
+
           <button
             onClick={() => setActiveTab('hall_of_fame')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'hall_of_fame'
-                ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                ? 'bg-amber-100/90 text-amber-950 border border-amber-300 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <Trophy className="w-4 h-4 text-amber-600" />
             <span>قاعة الشرف السنوية</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('nominations')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'nominations'
-                ? 'bg-amber-50 text-amber-900 border border-amber-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <UserCheck className="w-4 h-4 text-amber-600" />
-            <span>ترشيحات المسؤولين والقرعة 🎲</span>
           </button>
 
           <button
@@ -566,6 +579,17 @@ export default function App() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                {/* Electronic Lottery & Nominations Quick Button */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('nominations')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 rounded-xl text-xs font-black transition-all shadow-xs cursor-pointer hover:scale-105 active:scale-95 border border-amber-500/40"
+                  title="الانتقال إلى ترشيحات مسؤولي الشعب والقرعة الإلكترونية"
+                >
+                  <Shuffle className="w-3.5 h-3.5" />
+                  <span>القرعة الإلكترونية والترشيحات 🎲</span>
+                </button>
+
                 {/* Star Style Quick Toggle */}
                 <button
                   type="button"

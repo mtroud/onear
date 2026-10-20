@@ -4,6 +4,7 @@ import { CertificateBoard } from './CertificateBoard';
 import { PrintModal } from './PrintModal';
 import { AnnualHallOfFame } from './AnnualHallOfFame';
 import { AffiliateBioModal } from './AffiliateBioModal';
+import { NominationManager } from './NominationManager';
 import {
   Award,
   Calendar,
@@ -18,6 +19,9 @@ import {
   Check,
   Trophy,
   Users,
+  Eye,
+  UserCheck,
+  Shuffle,
 } from 'lucide-react';
 import { toArabicNumerals } from '../data/defaultData';
 import confetti from 'canvas-confetti';
@@ -26,6 +30,8 @@ interface PublicVisitorViewProps {
   boardSettings: BoardSettings;
   monthName: string;
   year: number;
+  selectedYear?: number;
+  selectedMonthIndex?: number;
   useArabicNumerals: boolean;
   person1: Employee | null;
   person2: Employee | null;
@@ -35,12 +41,16 @@ interface PublicVisitorViewProps {
   employees: Employee[];
   onOpenAdminLogin: () => void;
   onOpenQRCodeModal: () => void;
+  onAssignToPerson1?: (id: string) => void;
+  onAssignToPerson2?: (id: string) => void;
 }
 
 export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
   boardSettings,
   monthName,
   year,
+  selectedYear = year,
+  selectedMonthIndex = 8,
   useArabicNumerals,
   person1,
   person2,
@@ -50,8 +60,10 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
   employees,
   onOpenAdminLogin,
   onOpenQRCodeModal,
+  onAssignToPerson1 = () => {},
+  onAssignToPerson2 = () => {},
 }) => {
-  const [visitorTab, setVisitorTab] = useState<'board' | 'hall_of_fame'>('board');
+  const [visitorTab, setVisitorTab] = useState<'board' | 'nominations' | 'hall_of_fame'>('board');
   const [bioEmployee, setBioEmployee] = useState<Employee | null>(null);
   const [bioMonth, setBioMonth] = useState<string>(monthName);
   const [bioYear, setBioYear] = useState<number>(year);
@@ -84,8 +96,27 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 via-amber-50/20 to-slate-100 flex flex-col font-['Cairo',sans-serif]">
-      {/* Top Visitor Header Bar */}
-      <header className="no-print bg-white/90 backdrop-blur-md border-b border-amber-200/60 sticky top-0 z-30 shadow-xs">
+      {/* 1. Top Admin Switcher Notice Bar (Very prominent) */}
+      <div className="no-print bg-slate-900 text-amber-300 px-4 py-2 text-xs font-semibold border-b border-amber-500/30">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Eye className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>
+              أنت الآن في <strong>وضع الزائر (المعاينة العامة)</strong>. للوصول إلى لوحة التحكم الكاملة والقرعة الإلكترونية:
+            </span>
+          </div>
+          <button
+            onClick={onOpenAdminLogin}
+            className="flex items-center gap-1.5 px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl transition-all shadow-sm cursor-pointer text-xs"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>دخول لوحة تحكم المسؤول (PIN) ⚙️</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Top Visitor Header Bar */}
+      <header className="no-print bg-white/95 backdrop-blur-md border-b border-amber-200/60 sticky top-0 z-30 shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md">
@@ -105,7 +136,7 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
             {/* Share Button */}
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               title="مشاركة الرابط"
             >
               {copiedLink ? (
@@ -124,7 +155,7 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
             {/* QR Code view */}
             <button
               onClick={onOpenQRCodeModal}
-              className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300/60 rounded-xl transition-colors"
+              className="p-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300/60 rounded-xl transition-colors cursor-pointer"
               title="عرض الباركود"
             >
               <QrCode className="w-4 h-4" />
@@ -136,17 +167,17 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>طباعة اللوحة</span>
+              <span className="hidden sm:inline">طباعة اللوحة</span>
             </button>
 
-            {/* Admin Login Button */}
+            {/* Admin Login Button - Always visible with icon and text! */}
             <button
               onClick={onOpenAdminLogin}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors mr-1"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-xs cursor-pointer border border-amber-500/40"
               title="تسجيل دخول مسؤول النظام"
             >
-              <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden md:inline">دخول الإدارة</span>
+              <Lock className="w-3.5 h-3.5 text-slate-900" />
+              <span>دخول الإدارة ⚙️</span>
             </button>
           </div>
         </div>
@@ -166,6 +197,19 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
           </button>
 
           <button
+            onClick={() => setVisitorTab('nominations')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              visitorTab === 'nominations'
+                ? 'bg-amber-500 text-slate-950 font-black ring-2 ring-amber-400 shadow-sm'
+                : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+            }`}
+          >
+            <UserCheck className="w-3.5 h-3.5 text-amber-700" />
+            <span>ترشيحات المسؤولين والقرعة 🎲</span>
+            <span className="bg-amber-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-mono">جديد</span>
+          </button>
+
+          <button
             onClick={() => setVisitorTab('hall_of_fame')}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
               visitorTab === 'hall_of_fame'
@@ -180,8 +224,42 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {visitorTab === 'hall_of_fame' ? (
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Tab 1: Nominations and Lottery Tab */}
+        {visitorTab === 'nominations' && (
+          <div className="space-y-4">
+            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950">
+              <div>
+                <p className="font-bold text-sm">
+                  🎲 شاشة ترشيحات مسؤولي الشعب والقرعة الإلكترونية المباشرة
+                </p>
+                <p className="text-slate-600 mt-0.5">
+                  يمكنك مشاهدة قائمة مرشحي مسؤولي الأقسام ونتائج القرعة. لإضافة ترشيح رسمي أو تعديل اللوحة يرجى تسجيل الدخول كمسؤول.
+                </p>
+              </div>
+              <button
+                onClick={onOpenAdminLogin}
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold cursor-pointer shrink-0"
+              >
+                دخول الإدارة للترشيح ←
+              </button>
+            </div>
+
+            <NominationManager
+              employees={employees}
+              selectedYear={selectedYear}
+              selectedMonthIndex={selectedMonthIndex}
+              monthName={displayMonthName}
+              person1Id={person1?.id || 'emp-1'}
+              person2Id={person2?.id || 'emp-2'}
+              onAssignToPerson1={(id) => onAssignToPerson1(id)}
+              onAssignToPerson2={(id) => onAssignToPerson2(id)}
+            />
+          </div>
+        )}
+
+        {/* Tab 2: Hall of fame */}
+        {visitorTab === 'hall_of_fame' && (
           <AnnualHallOfFame
             history={history}
             employees={employees}
@@ -196,12 +274,42 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
               setBioMonth(mName);
               setBioYear(yr);
             }}
-            onPrintCertificate={(emp) => {
+            onPrintCertificate={() => {
               setIsPrintModalOpen(true);
             }}
           />
-        ) : (
+        )}
+
+        {/* Tab 3: Monthly Board View */}
+        {visitorTab === 'board' && (
           <>
+            {/* Quick Access Banner to Nominations & Lottery */}
+            <div className="no-print p-4 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-white border-2 border-amber-300/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-500 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                  🎲
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <span>نظام ترشيحات مسؤولي الأقسام والقرعة الإلكترونية الشهرية</span>
+                    <span className="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full">
+                      جديد
+                    </span>
+                  </h4>
+                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                    يقوم كل مسؤول شعبة بترشيح منتسب مميز من قسمه، وقبل نهاية الشهر تُجرى القرعة العشوائية الإلكترونية لاختيار المكرمَين الاثنين بنزاهة وشفافية مطلقة.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVisitorTab('nominations')}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs cursor-pointer self-start sm:self-center shrink-0"
+              >
+                <span>مشاهدة ترشيحات الشعب والقرعة 🎲 ←</span>
+              </button>
+            </div>
+
             {/* Welcome & Honor Banner */}
             <div className="no-print text-center max-w-2xl mx-auto space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-bold">
@@ -210,164 +318,111 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
                   تكريم شهر {displayMonthName} لعام {toArabicNumerals(displayYear)} م
                 </span>
               </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            نبارك للمنتسبين المميزين عطاءهم المبارك
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
-            {boardSettings.subTitle} • تقديراً للجهود المتميزة والتفاني والإخلاص في خدمة الزائرين الكرام
-          </p>
-
-          {selectedAward && (
-            <div className="pt-2">
-              <button
-                onClick={() => setSelectedAward(null)}
-                className="text-xs font-bold text-amber-700 hover:text-amber-900 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full inline-flex items-center gap-1"
-              >
-                <span>العودة لتكريم الشهر الحالي</span>
-                <ChevronLeft className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-          {/* Action to replay animation */}
-          <div className="flex justify-center gap-2 pt-1">
-            <button
-              onClick={() => {
-                setAnimKey((prev) => prev + 1);
-                confetti({ particleCount: 25, spread: 50, origin: { y: 0.6 } });
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>إعادة عرض حركة التكريم</span>
-            </button>
-          </div>
-        </div>
-
-        {/* The Honor Board Component */}
-        <div className="flex justify-center w-full">
-          <div className="w-full max-w-4xl shadow-xl rounded-2xl overflow-hidden">
-            <CertificateBoard
-              settings={boardSettings}
-              monthName={displayMonthName}
-              year={displayYear}
-              useArabicNumerals={useArabicNumerals}
-              person1={displayPerson1}
-              person2={displayPerson2}
-              photoOffset1={selectedAward?.photoOffset1 || photoOffset1}
-              photoOffset2={selectedAward?.photoOffset2 || photoOffset2}
-              animationKey={animKey}
-            />
-          </div>
-        </div>
-
-        {/* Honorees Spotlight Cards */}
-        <div className="no-print grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-          {/* Person 1 */}
-          <div className="bg-white p-5 rounded-2xl border border-amber-200/80 shadow-xs flex items-center gap-4">
-            <img
-              src={displayPerson1?.photoUrl || ''}
-              alt={displayPerson1?.name || ''}
-              className="w-18 h-18 rounded-full object-cover border-2 border-amber-600 shadow-md flex-shrink-0"
-            />
-            <div>
-              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
-                المنتسب المميز
-              </span>
-              <h3 className="text-lg font-bold text-slate-900 mt-1">
-                {displayPerson1?.name || 'الاسم'}
-              </h3>
-              <p className="text-xs font-semibold text-slate-600">
-                {displayPerson1?.title || 'المسمى الوظيفي'}
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                نبارك للمنتسبين المميزين عطاءهم المبارك
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600">
+                {boardSettings.subTitle} • تقديراً للجهود المتميزة والتفاني والإخلاص في خدمة الزائرين الكرام
               </p>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                <Building className="w-3.5 h-3.5 text-amber-600" />
-                <span>{displayPerson1?.department || 'القسم'}</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Person 2 */}
-          <div className="bg-white p-5 rounded-2xl border border-blue-200/80 shadow-xs flex items-center gap-4">
-            <img
-              src={displayPerson2?.photoUrl || ''}
-              alt={displayPerson2?.name || ''}
-              className="w-18 h-18 rounded-full object-cover border-2 border-blue-600 shadow-md flex-shrink-0"
-            />
-            <div>
-              <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                المنتسب المميز
-              </span>
-              <h3 className="text-lg font-bold text-slate-900 mt-1">
-                {displayPerson2?.name || 'الاسم'}
-              </h3>
-              <p className="text-xs font-semibold text-slate-600">
-                {displayPerson2?.title || 'المسمى الوظيفي'}
-              </p>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                <Building className="w-3.5 h-3.5 text-blue-600" />
-                <span>{displayPerson2?.department || 'القسم'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Past Months Gallery for Visitors */}
-        {history.length > 0 && (
-          <div className="no-print bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-amber-600" />
-                <h3 className="text-base font-bold text-slate-900">سجل التكريمات السابقة</h3>
-              </div>
-              <span className="text-xs text-slate-500">
-                انقر على أي شهر لرؤية لوحة شرفه
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {history.map((item) => {
-                const isCurrent =
-                  item.year === displayYear && item.monthName === displayMonthName;
-                const p1 = employees.find((e) => e.id === item.person1Id);
-                const p2 = employees.find((e) => e.id === item.person2Id);
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedAward(item)}
-                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
-                      isCurrent
-                        ? 'border-amber-600 bg-amber-50/80 shadow-xs'
-                        : 'border-slate-200 hover:border-amber-400 bg-slate-50/70 hover:bg-white'
-                    }`}
+              {selectedAward && (
+                <div className="pt-2">
+                  <button
+                    onClick={() => setSelectedAward(null)}
+                    className="text-xs font-bold text-amber-700 hover:text-amber-900 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full inline-flex items-center gap-1 cursor-pointer"
                   >
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-900">
-                      <span>{item.monthName}</span>
-                      <span>{toArabicNumerals(item.year)} م</span>
-                    </div>
+                    <span>العودة لتكريم الشهر الحالي</span>
+                    <ChevronLeft className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
 
-                    <div className="flex items-center -space-x-2 space-x-reverse my-2">
-                      <img
-                        src={p1?.photoUrl || ''}
-                        alt=""
-                        className="w-7 h-7 rounded-full border-2 border-white object-cover"
-                      />
-                      <img
-                        src={p2?.photoUrl || ''}
-                        alt=""
-                        className="w-7 h-7 rounded-full border-2 border-white object-cover"
-                      />
-                    </div>
+              {/* Action to replay animation */}
+              <div className="flex justify-center gap-2 pt-1">
+                <button
+                  onClick={() => {
+                    setAnimKey((prev) => prev + 1);
+                    confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs text-amber-800 bg-amber-100/70 hover:bg-amber-200 px-3 py-1 rounded-full font-bold transition-colors cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+                  <span>إعادة الحركة والتأثيرات</span>
+                </button>
+              </div>
+            </div>
 
-                    <p className="text-[10px] text-slate-500 truncate">
-                      {p1?.name || ''} و {p2?.name || ''}
+            {/* The Certificate Board */}
+            <div className="flex justify-center w-full">
+              <div className="w-full max-w-5xl">
+                <CertificateBoard
+                  settings={boardSettings}
+                  monthName={displayMonthName}
+                  year={displayYear}
+                  useArabicNumerals={useArabicNumerals}
+                  person1={displayPerson1}
+                  person2={displayPerson2}
+                  photoOffset1={photoOffset1}
+                  photoOffset2={photoOffset2}
+                  animationKey={animKey}
+                />
+              </div>
+            </div>
+
+            {/* Honorees Profiles Grid */}
+            <div className="no-print grid grid-cols-1 md:grid-cols-2 gap-5 pt-4">
+              {displayPerson1 && (
+                <div className="bg-white rounded-3xl p-5 border border-amber-200/80 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-500 shadow-sm flex-shrink-0">
+                    <img
+                      src={displayPerson1.photoUrl}
+                      alt={displayPerson1.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">
+                      المكرم الأول
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {displayPerson1.name}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {displayPerson1.department} • {displayPerson1.title}
+                    </p>
+                    <p className="text-xs text-slate-600 pt-1 leading-relaxed">
+                      نال التكريم تقديراً لإخلاصه وانضباطه العالي وحسن تعامله مع زوار العتبة المقدسة.
                     </p>
                   </div>
-                );
-              })}
+                </div>
+              )}
+
+              {displayPerson2 && (
+                <div className="bg-white rounded-3xl p-5 border border-amber-200/80 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-500 shadow-sm flex-shrink-0">
+                    <img
+                      src={displayPerson2.photoUrl}
+                      alt={displayPerson2.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">
+                      المكرم الثاني
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {displayPerson2.name}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {displayPerson2.department} • {displayPerson2.title}
+                    </p>
+                    <p className="text-xs text-slate-600 pt-1 leading-relaxed">
+                      نال التكريم تقديراً لجهوده وتفانيه في إنجاز المهام الموكلة إليه بكل أمانة واقتدار.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
           </>
         )}
       </main>
@@ -383,10 +438,10 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
             <span>•</span>
             <button
               onClick={onOpenAdminLogin}
-              className="text-slate-500 hover:text-amber-800 underline flex items-center gap-1 cursor-pointer"
+              className="text-amber-700 hover:text-amber-900 font-bold underline flex items-center gap-1 cursor-pointer"
             >
               <Lock className="w-3 h-3" />
-              <span>تسجيل دخول الإدارة</span>
+              <span>دخول لوحة تحكم المسؤول (PIN)</span>
             </button>
           </div>
         </div>
@@ -406,17 +461,17 @@ export const PublicVisitorView: React.FC<PublicVisitorViewProps> = ({
         settings={boardSettings}
       />
 
-      {/* Affiliate Bio Modal for Visitor */}
-      <AffiliateBioModal
-        isOpen={Boolean(bioEmployee)}
-        onClose={() => setBioEmployee(null)}
-        employee={bioEmployee}
-        monthName={bioMonth}
-        year={bioYear}
-        onPrintCertificate={(emp) => {
-          setIsPrintModalOpen(true);
-        }}
-      />
+      {/* Bio Modal */}
+      {bioEmployee && (
+        <AffiliateBioModal
+          isOpen={Boolean(bioEmployee)}
+          employee={bioEmployee}
+          monthName={bioMonth}
+          year={bioYear}
+          onClose={() => setBioEmployee(null)}
+          onPrintCertificate={() => setIsPrintModalOpen(true)}
+        />
+      )}
     </div>
   );
 };
