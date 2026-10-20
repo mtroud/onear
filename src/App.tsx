@@ -485,7 +485,7 @@ export default function App() {
             }`}
           >
             <UserCheck className="w-4 h-4 text-amber-600" />
-            <span>الترشيحات والتصويت</span>
+            <span>ترشيحات المسؤولين والقرعة 🎲</span>
           </button>
 
           <button
@@ -549,6 +549,7 @@ export default function App() {
                 setPhotoOffset2={setPhotoOffset2}
                 onSaveToHistory={handleSaveToHistory}
                 historyMonthIds={history.map((h) => `${h.year}-${h.monthIndex}`)}
+                onOpenNominations={() => setActiveTab('nominations')}
               />
             </div>
 

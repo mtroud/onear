@@ -33,6 +33,7 @@ interface MonthlySelectorProps {
   setPhotoOffset2: (offset: { x: number; y: number; zoom: number }) => void;
   onSaveToHistory: () => void;
   historyMonthIds: string[];
+  onOpenNominations?: () => void;
 }
 
 export const MonthlySelector: React.FC<MonthlySelectorProps> = ({
@@ -51,6 +52,7 @@ export const MonthlySelector: React.FC<MonthlySelectorProps> = ({
   setPhotoOffset2,
   onSaveToHistory,
   historyMonthIds,
+  onOpenNominations,
 }) => {
   const [modalTarget, setModalTarget] = useState<'person1' | 'person2' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,6 +153,37 @@ export const MonthlySelector: React.FC<MonthlySelectorProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Quick Access Banner to Nominations & Electronic Lottery */}
+      {onOpenNominations && (
+        <div className="mt-4 p-3.5 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-slate-50 border border-amber-300/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+              🎲
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900">
+                  نظام ترشيحات مسؤولي الشعب والقرعة الإلكترونية لنهاية الشهر
+                </h4>
+                <span className="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full">
+                  جديد
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                يقوم كل مسؤول شعبة بترشيح منتسب مميز، وقبل نهاية الشهر يتم إجراء القرعة العشوائية الإلكترونية لاختيار المكرمين الاثنين تلقائياً.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenNominations}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-xs font-black shadow-xs cursor-pointer self-start sm:self-center shrink-0"
+          >
+            <span>إجراء القرعة / إدارة الترشيحات ←</span>
+          </button>
+        </div>
+      )}
 
       {/* The Two Selected Affiliates Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 relative">
